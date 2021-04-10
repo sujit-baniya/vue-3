@@ -14,6 +14,9 @@ export default {
         rows: {type: Array},
         serverUrl: {type: String},
         serverMethod: { type: Function },
+        search: { type: Function },
+        pagination: { type: Function },
+        limit: {type: Number},
     },
     data() {
         return {
@@ -30,15 +33,15 @@ export default {
         let config = {
             pagination: {
                 enabled: true,
-                limit: 2,
+                limit: this.limit,
                 server: {
-                    url: (prev, page, limit) => `${prev}?limit=${limit}&offset=${page * limit}`
+                    url: this.pagination
                 }
             },
             columns: this.cols,
             search: {
                 server: {
-                    url: (prev, keyword) => `${prev}?search=${keyword}`
+                    url: this.search
                 }
             },
         }

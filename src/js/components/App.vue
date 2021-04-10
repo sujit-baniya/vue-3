@@ -5,6 +5,8 @@
             :cols="cols"
             server-url="https://swapi.dev/api/films/"
             :server-method="handleResponse"
+            :search="search"
+            :pagination="pagination"
         />
     </div>
 </template>
@@ -16,7 +18,20 @@ export default {
     components: {Grid},
     data() {
         return {
-            cols: ['Title', 'Director', 'Producer']
+            cols: [
+                {
+                    name: "Title",
+                    formatter: (cell) => {
+                        return `Title ${cell}`
+                    }
+                },
+                {
+                    name: "Director"
+                },
+                {
+                    name: "Producer"
+                }
+            ]
         }
     },
     methods: {
@@ -24,6 +39,12 @@ export default {
             return data.results.map(movie =>
                 [movie.title, movie.director, movie.producer]
             )
+        },
+        search(prev, keyword) {
+            return `${prev}?search=${keyword}`
+        },
+        pagination(prev, page, limit) {
+            return `${prev}?limit=${limit}&offset=${page * limit}`
         }
     }
 }
