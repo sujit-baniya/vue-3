@@ -9,11 +9,15 @@ import "gridjs/dist/theme/mermaid.css";
 
 export default {
     name: "Grid",
+    props: {
+        cols: {type: Array},
+        rows: {type: Array},
+        serverUrl: {type: String},
+        serverMethod: { type: Function },
+    },
     data() {
         return {
             uuid: nanoid(),
-            cols: [],
-            rows: []
         }
     },
     computed: {
@@ -22,26 +26,38 @@ export default {
         },
     },
     mounted() {
-        const grid = new Grid({
-            columns: [
-                {
-                    name: "Name",
-                    formatter: (cell) => `Name: ${cell}`
-                },
-                {
-                    name: "Email",
-                },
-                {
-                    name: "Email",
+        const grid = new Grid();
+        let config = {
+            pagination: {
+                enabled: true,
+                limit: 2,
+                server: {
+                    url: (prev, page, limit) => `${prev}?limit=${limit}&offset=${page * limit}`
                 }
-            ],
-            data: [
-                ['John', 'john@example.com', '(353) 01 222 3333'],
-                ['Mark', 'mark@gmail.com',   '(01) 22 888 4444']
-            ]
-        });
-        grid.render(document.getElementById(this.getId))
-    }
+            },
+            columns: this.cols,
+            search: {
+                server: {
+                    url: (prev, keyword) => `${prev}?search=${keyword}`
+                }
+            },
+        }
+        if (this.serverUrl) {
+            config = {
+                ...config,
+                server: {
+                    url: this.serverUrl,
+                    then: this.serverMethod
+                }
+            }
+        } else {
+            config = {
+                ...config,
+                data: this.rows
+            }
+        }
+        grid.updateConfig(config).render(document.getElementById(this.getId))
+    },
 }
 </script>
 

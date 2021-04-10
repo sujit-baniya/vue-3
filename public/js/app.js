@@ -17,6 +17,18 @@ __webpack_require__.r(__webpack_exports__);
   name: "App",
   components: {
     Grid: _grid_Grid__WEBPACK_IMPORTED_MODULE_0__.default
+  },
+  data: function data() {
+    return {
+      cols: ['Title', 'Director', 'Producer']
+    };
+  },
+  methods: {
+    handleResponse: function handleResponse(data) {
+      return data.results.map(function (movie) {
+        return [movie.title, movie.director, movie.producer];
+      });
+    }
   }
 });
 
@@ -37,16 +49,34 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var nanoid__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! nanoid */ "./node_modules/nanoid/index.dev.js");
 /* harmony import */ var gridjs_dist_theme_mermaid_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! gridjs/dist/theme/mermaid.css */ "./node_modules/gridjs/dist/theme/mermaid.css");
 /* harmony import */ var gridjs_dist_theme_mermaid_css__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(gridjs_dist_theme_mermaid_css__WEBPACK_IMPORTED_MODULE_2__);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "Grid",
+  props: {
+    cols: {
+      type: Array
+    },
+    rows: {
+      type: Array
+    },
+    serverUrl: {
+      type: String
+    },
+    serverMethod: {
+      type: Function
+    }
+  },
   data: function data() {
     return {
-      uuid: (0,nanoid__WEBPACK_IMPORTED_MODULE_1__.nanoid)(),
-      cols: [],
-      rows: []
+      uuid: (0,nanoid__WEBPACK_IMPORTED_MODULE_1__.nanoid)()
     };
   },
   computed: {
@@ -55,20 +85,41 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   mounted: function mounted() {
-    var grid = new gridjs__WEBPACK_IMPORTED_MODULE_0__.Grid({
-      columns: [{
-        name: "Name",
-        formatter: function formatter(cell) {
-          return "Name: ".concat(cell);
+    var grid = new gridjs__WEBPACK_IMPORTED_MODULE_0__.Grid();
+    var config = {
+      pagination: {
+        enabled: true,
+        limit: 2,
+        server: {
+          url: function url(prev, page, limit) {
+            return "".concat(prev, "?limit=").concat(limit, "&offset=").concat(page * limit);
+          }
         }
-      }, {
-        name: "Email"
-      }, {
-        name: "Email"
-      }],
-      data: [['John', 'john@example.com', '(353) 01 222 3333'], ['Mark', 'mark@gmail.com', '(01) 22 888 4444']]
-    });
-    grid.render(document.getElementById(this.getId));
+      },
+      columns: this.cols,
+      search: {
+        server: {
+          url: function url(prev, keyword) {
+            return "".concat(prev, "?search=").concat(keyword);
+          }
+        }
+      }
+    };
+
+    if (this.serverUrl) {
+      config = _objectSpread(_objectSpread({}, config), {}, {
+        server: {
+          url: this.serverUrl,
+          then: this.serverMethod
+        }
+      });
+    } else {
+      config = _objectSpread(_objectSpread({}, config), {}, {
+        data: this.rows
+      });
+    }
+
+    grid.updateConfig(config).render(document.getElementById(this.getId));
   }
 });
 
@@ -101,7 +152,13 @@ var _hoisted_1 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)("
 var render = /*#__PURE__*/_withId(function (_ctx, _cache, $props, $setup, $data, $options) {
   var _component_grid = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("grid");
 
-  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)("div", null, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_grid)]);
+  return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)("div", null, [_hoisted_1, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_grid, {
+    cols: $data.cols,
+    "server-url": "https://swapi.dev/api/films/",
+    "server-method": $options.handleResponse
+  }, null, 8
+  /* PROPS */
+  , ["cols", "server-method"])]);
 });
 
 /***/ }),
